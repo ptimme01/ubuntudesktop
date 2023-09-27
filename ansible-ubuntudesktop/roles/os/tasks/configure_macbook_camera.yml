@@ -1,0 +1,79 @@
+- name: Install dependency packages
+  become: true
+  apt:
+    pkg:
+    - xz-utils
+    - curl
+    - cpio
+    - make
+    - linux-headers-generic
+    - kmod
+    - libssl-dev
+    - checkinstall
+    - unzip
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Check if previous git already 
+  become: true
+  stat:
+    path: /root/scm/facetimehd-firmware
+  register: doesPreviousFacetimehdInstallExist
+
+- name: Clone the git rep for firmware
+  become: True
+  shell: cd ~/scm && git clone https://github.com/patjak/facetimehd-firmware.git
+  when: not doesPreviousFacetimehdInstallExist.stat.exists
+
+- name: Make firmware
+  become: True
+  shell: cd ~/scm/facetimehd-firmware && make && make install
+  #might need a reboot
+
+- name: Copy color calibration files 
+  become: true
+  copy: 
+    src: "{{ item.src }}"
+    dest: /lib/firmware/facetimehd/{{ item.dest }}
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+    force: "{{ item.force }}"
+    decrypt: yes
+  with_items:
+     - { src: '1771_01XX.dat', dest: '1771_01XX.dat', mode: '0664', owner: 'root', group: 'root', force: 'yes'}
+     - { src: '1871_01XX.dat', dest: '1871_01XX.dat', mode: '0664', owner: 'root', group: 'root', force: 'yes'}
+     - { src: '1874_01XX.dat', dest: '1874_01XX.dat', mode: '0664', owner: 'root', group: 'root', force: 'yes'}
+     - { src: '9112_01XX.dat', dest: '9112_01XX.dat', mode: '0664', owner: 'root', group: 'root', force: 'yes'}
+
+- name: Check if previous git repo is already present 
+  become: true
+  stat:
+    path: /root/scm/bcwc_pcie
+  register: doesPreviousBcwcInstallExist
+
+- name: Clone the git rep for install
+  become: True
+  shell: cd ~/scm && git clone https://github.com/patjak/bcwc_pcie.git
+  when: not doesPreviousBcwcInstallExist.stat.exists
+
+- name: Make firmware
+  become: True
+  shell: cd ~/scm/bcwc_pcie && make && make install
+
+- name: Run modules
+  tags: run
+  become: True
+  shell: cd ~/scm/bcwc_pcie && depmod && modprobe facetimehd
+
+- name: Make driver load correctly on startup
+  become: True
+  lineinfile:
+    path: /etc/modules
+    line: "facetimehd"
+    state: present
+    backup: yes
+  notify:
+    - Restart OS
+
+  

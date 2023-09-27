@@ -1,0 +1,161 @@
+- name: Delay up to an hour to confirm unattended or apt not being 
+  become: true
+  shell: lsof /var/lib/dpkg/lock-frontend
+  register: aptBusyResult
+  retries: 60
+  delay: 60
+  until: aptBusyResult.rc == 1
+  failed_when: aptBusyResult.rc >= 2
+  changed_when: false
+
+- name: Install packages to allow apt to use a repository over HTTPS
+  become: true
+  apt:
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Install podman before docker and distrobox
+  become: true
+  apt:
+    pkg:
+    - podman
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Add podman registries
+  become: True
+  blockinfile:
+    path: /etc/containers/registries.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK install_packages.yml"
+    block: |
+      [registries.search]
+      registries = ["registry.access.redhat.com", "registry.fedoraproject.org", "quay.io"]
+
+- name: Install distrobox (might be an apt on newer than 22.04)
+  become: true
+  shell: wget -qO- https://raw.githubusercontent.com/89luca89/distrobox/main/install | sh
+
+- name: Add flatpak stable
+  become: true
+  ansible.builtin.apt_repository:
+    repo: ppa:flatpak/stable
+
+- name: Install flatpak from official ppa so it's always up to date
+  become: true
+  apt:
+    pkg:
+    - flatpak
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Upgrade using a backport library so flatpak doesn't error
+  become: True 
+  shell: apt-get install -t jammy-backports libappstream4
+
+- name: add flatpak hub
+  become: True
+  shell: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    
+- name: Add openvpn gpg signing key
+  become: True
+  shell: curl -fsSL https://swupdate.openvpn.net/repos/repo-public.gpg | gpg --dearmor > /etc/apt/keyrings/openvpn-repo-public.gpg
+
+- name: Adding openvpn  repository 
+  become: true
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/openvpn-repo-public.gpg] https://build.openvpn.net/debian/openvpn/stable {{ ansible_lsb['codename'] }} main"
+    state: present
+    filename: openvpn-aptrepo
+    codename: "{{ ansible_lsb['codename'] }}"
+    update_cache: yes
+
+- name: Add microsoft vs code gpg signing key
+  become: True
+  shell: wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/keyrings/packages.microsoft.gpg
+
+- name: Adding microsoft vs code repository 
+  become: true
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
+    state: present
+    filename: vscode
+    codename: "{{ ansible_lsb['codename'] }}"
+    update_cache: yes
+
+- name: Install Chrome (note this will add apt repo and can update then with apt)
+  become: True
+  shell: cd /tmp && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && dpkg -i google-chrome-stable_current_amd64.deb
+
+- name: Install openvpn from official ppa so it's always up to date
+  become: true
+  apt:
+    pkg:
+    - openvpn
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Add docker gpg signing key
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Adding docker repository 
+  become: true
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb['codename'] }} stable"
+    state: present
+    filename: docker-ce
+    codename: "{{ ansible_lsb['codename'] }}"
+    update_cache: yes
+
+- name: Installing docker apps
+  become: true
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+    force_apt_get: yes
+    update_cache: yes
+  when: shouldInstallDocker
+
+- name: Install flatpak apps
+  become: True
+  vars:
+    flatpakAppsToInstall:
+      - com.usebottles.bottles
+      - com.github.tchx84.Flatseal
+      - org.kde.okular
+      - com.mattjakeman.ExtensionManager
+  shell: flatpak install flathub {{item}} -y
+  with_items: "{{flatpakAppsToInstall}}"
+
+- name: Install additional packages
+  become: true
+  apt:
+    pkg:
+    - gnome-shell-extension-manager
+    - xz-utils
+    - curl
+    - cpio
+    - unzip
+    - guvcview 
+    - gufw
+    - lm-sensors
+    - dconf-editor
+    - gnome-tweaks
+    - mtree-netbsd
+    - jq
+    - code
+    - libfuse2
+    force_apt_get: yes
+    update_cache: yes

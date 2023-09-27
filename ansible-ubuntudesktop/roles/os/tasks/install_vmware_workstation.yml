@@ -1,0 +1,31 @@
+- name: Get kernel
+  become: True 
+  shell: uname -r
+  register: varKernelVersion
+
+- name: Install packages pre-req
+  become: true
+  apt:
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+    - build-essential
+    - linux-headers-{{varKernelVersion.stdout}}
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Download vmware workstation
+  become: true
+  ansible.builtin.get_url:
+    url: http://intranet.cymcore.com/files/software/ubuntu/VMware-Workstation-Full-17.0.2-21581411.x86_64.bundle
+    dest: /tmp
+    mode: '0770'
+    owner: root
+    group: root
+
+- name: Install vmware
+  become: True
+  shell: /tmp/VMware-Workstation-Full-17.0.2-21581411.x86_64.bundle

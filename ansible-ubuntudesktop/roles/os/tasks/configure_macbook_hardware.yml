@@ -1,0 +1,21 @@
+- name: Change critical battery level to poweroff
+  become: True
+  lineinfile:
+    path: /etc/UPower/UPower.conf
+    regexp: "^CriticalPowerAction" 
+    line: "CriticalPowerAction=Poweroff"
+    state: present
+    backup: yes
+
+- name: Change default sleep to s2idle (macbook fails to come back on if it goes into deep) and dont print the acpi (or any) error messages during boot
+  become: True
+  lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT" 
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=s2idle"'
+    state: present
+    backup: yes
+
+- name: Update grub after config change
+  become: true
+  shell: update-grub

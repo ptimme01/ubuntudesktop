@@ -1,0 +1,4 @@
+---
+promptVariables:
+    - { vname: 'roleName', prompt: 'what is the name of the ansible role (all lower)?' }
+

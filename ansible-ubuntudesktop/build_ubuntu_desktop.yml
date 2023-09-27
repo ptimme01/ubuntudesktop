@@ -1,0 +1,48 @@
+- name: Build ubuntu desktop
+  hosts: localhost
+  vars:
+  pre_tasks:
+    - name: Conntect to site on cymcore network
+      vars:
+        neverFail: True
+      uri:
+        url: https://intranet.cymcore.com
+        return_content: no
+      register: isOnCymcoreNetwork
+      failed_when: neverFail is false
+
+    - name: Assert on cymcore network  
+      assert:
+        that: "{{ isOnCymcoreNetwork.status}} == 200"
+        fail_msg: "Not on the cymcore network"
+
+  roles:
+    - role: os
+      param_action: create_timeshift_snapshot
+      when: shouldConfigureTimeshiftSnapshot
+    - role: os
+      param_action: configure
+      when: shouldConfigure
+    - role: user
+      param_action: ptimme01
+      when: shouldConfigurePtimme01
+    - role: os
+      param_action: install_system_packages
+      when: shouldInstallSystemPackages
+    - role: os
+      param_action: install_user_packages
+      when: shouldInstallUserPackages
+    - role: os
+      param_action: install_vmware_workstation
+      when: shouldInstallVmwareWorkstation
+    - role: os
+      param_action: configure_wificym
+      when: shouldConfigureWificym
+    - role: os
+      param_action: configure_macbook_hardware
+      when: shouldConfigureMacbookHardware
+    - role: os
+      param_action: configure_macbook_camera
+      when: shouldConfigureMacbookCamera
+
+  

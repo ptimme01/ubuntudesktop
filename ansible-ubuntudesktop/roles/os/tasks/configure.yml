@@ -1,0 +1,69 @@
+- name: Ensure variables are defined
+  assert:
+    that: "{{ item }} is string()"
+    fail_msg: "Mandatory variables not set"
+  with_items:
+    - hostName
+    - hostDomain
+
+- name: Modify hosts file to include new host and fqdn on loopback address
+  become: true
+  template:
+    src: hosts
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: '644'
+
+- name: Check if cloudinit is being used
+  become: true
+  stat:
+    path: /etc/cloud/cloud.cfg
+  register: isCloudInitEnabled
+
+- name: Add cloudinit override file
+  become: true
+  copy:
+    src: 99_hostname.cfg
+    dest: /etc/cloud/cloud.cfg.d/
+    owner: root
+    group: root
+    mode: '644'
+  when: isCloudInitEnabled.stat.exists
+
+- name: Change hostname
+  become: true
+  shell: >
+    hostname | 
+    grep -q {{hostName}} && 
+    echo -n SAME || 
+    hostnamectl set-hostname {{ hostName }}
+  register: hostNameStatus
+  changed_when: hostNameStatus.stdout is not search('SAME')
+
+- name: Copy git_basesetting.sh
+  become: true
+  copy:
+    src: git_basesetting.sh
+    dest: /etc/profile.d/git_basesetting.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy .dircolors to root home
+  become: true
+  copy:
+    src: dircolors
+    dest: /root/.dircolors
+    owner: root
+    group: root
+    mode: '0660'
+
+- name: Copy .dircolors to sysadmin home
+  become: true
+  copy:
+    src: dircolors
+    dest: /home/sysadmin/.dircolors
+    owner: sysadmin
+    group: sysadmin
+    mode: '0660'

@@ -1,0 +1,7 @@
+- name: install vmware
+  hosts: localhost
+  vars:
+
+  roles:
+    - role: os
+      param_action: install_vmware_workstation

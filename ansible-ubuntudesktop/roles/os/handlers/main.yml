@@ -1,0 +1,6 @@
+---
+# handlers file for ./roles/os
+- name: Restart operating system
+  become: True
+  shell: systemctl reboot
+  listen: Restart OS

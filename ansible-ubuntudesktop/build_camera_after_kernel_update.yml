@@ -1,0 +1,5 @@
+- name: Build macbook
+  hosts: localhost
+  roles:
+    - role: os
+      param_action: configure_camera

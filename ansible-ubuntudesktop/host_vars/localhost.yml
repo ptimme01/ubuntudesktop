@@ -1,0 +1,19 @@
+#Python high version should align pythonX.YY in directory /.local/lib/
+pythonHighVersion: 3.10
+hostName: macbook
+hostDomain: cymcore.com
+ansible_connection: local
+# Static network vars only apply if shouldConfigureWificym is true
+staticWifiIp: 192.168.8.5
+staticWifiGateway: 192.168.8.1
+staticWifiDns: 192.168.1.50
+shouldConfigureTimeshiftSnapshot: True
+shouldConfigure: True
+shouldConfigurePtimme01: True
+shouldInstallSystemPackages: True
+shouldInstallUserPackages: True
+shouldInstallVmwareWorkstation: True
+shouldConfigureWificym: True
+shouldConfigureMacbookCamera: True
+shouldConfigureMacbookHardware: True
+shouldInstallDocker: True

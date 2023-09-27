@@ -1,0 +1,32 @@
+- name: Prompt for wifi password
+  pause:
+    prompt: Enter wificym2 and wificym5 passphrase
+    echo: false
+  register: varWifiPassphrase
+  no_log: true
+
+- name: Get network adapters
+  become: True
+  shell: ip a
+  register: varNetworkAdapters
+
+- name: Print network adapters
+  debug:
+    var: varNetworkAdapters.stdout
+
+- name: Prompt for wifi adapters
+  pause:
+    prompt: Enter wifi adapter
+    echo: false
+  register: varWifiInterace
+
+- name: Remove all network connections
+  become: True
+  shell: nmcli --fields UUID con show | awk 'NR>1 {print $1}' | while read line; do nmcli con delete uuid $line; done
+
+- name: Create wificym2 and wificym5 with static ip address (so firewall rules work)
+  become: True
+  shell: nmcli con add con-name {{item}} ifname {{varWifiInterace.user_input}} type wifi ssid {{item}} ip4 {{staticWifiIp}}/24 gw4 {{staticWifiGateway}} wifi-sec.key-mgmt wpa-psk wifi-sec.psk {{varWifiPassphrase.user_input}} ipv4.dns {{staticWifiDns}}
+  with_items:
+    - wificym2
+    - wificym5

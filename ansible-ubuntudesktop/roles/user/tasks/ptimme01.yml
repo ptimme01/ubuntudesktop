@@ -1,0 +1,91 @@
+- name: New user message
+  debug:
+    msg: User ptimme01 being created
+
+- name: Prompt for user password
+  pause:
+    prompt: Enter user password
+    echo: false
+  register: userOsPassword
+  no_log: true
+ 
+- name: Add user primary groups
+  become: true
+  ansible.builtin.group:
+    name: ptimme01
+    state: present
+    gid: 2001
+
+- name: Add user
+  become: true
+  ansible.builtin.user:
+    name: ptimme01
+    comment: Paul Timmerman
+    state: present
+    uid: 2001
+    group: ptimme01
+    groups: sudo
+    shell: /bin/bash
+    password: "{{ userOsPassword.user_input | password_hash('sha512') }}"
+  no_log: true
+
+- name: Copy .dircolors to ptimme01 home
+  become: true
+  copy:
+    src: dircolors
+    dest: /home/ptimme01/.dircolors
+    owner: ptimme01
+    group: ptimme01
+    mode: '0660'
+
+- name: Copy configure_ptimme01 to ptimme01 home
+  become: true
+  copy:
+    src: configure_ptimme01.sh
+    dest: /home/ptimme01/configure_ptimme01.sh
+    owner: ptimme01
+    group: ptimme01
+    mode: '0770'
+
+- name: Creates directories in home
+  tags: run
+  become: true
+  file:
+    path: /home/ptimme01/{{item.dest}}
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { dest: 'appimage', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+    - { dest: 'scm', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+    - { dest: 'Pictures/wallpaper', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+    - { dest: 'Pictures/icons', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+    - { dest: 'scripts', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+
+- name: Download etcher appimage
+  become: true
+  ansible.builtin.get_url:
+    url: http://intranet.cymcore.com/files/software/ubuntu/balenaEtcher-1.18.11-x64.AppImage
+    dest: /home/ptimme01/appimage
+    mode: '0770'
+    owner: ptimme01
+    group: ptimme01
+
+- name: Copy echer icon
+  become: true
+  copy:
+    src: etcher-icon.png
+    dest: /home/Pictures/icons/
+    owner: ptimme01
+    group: ptimme01
+    mode: '0770'
+
+- name: Copy echer .desktop file
+  become: true
+  copy:
+    src: etcher.dekstop
+    dest: /home/ptimme01/.local/share/applications/
+    owner: ptimme01
+    group: ptimme01
+    mode: '0770'

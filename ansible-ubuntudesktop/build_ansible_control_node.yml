@@ -1,0 +1,99 @@
+- name: Configure control node for local desktop
+  connection: local
+  vars:
+  hosts: localhost
+  gather_facts: True
+  roles:
+  pre_tasks:
+
+    - name: Find out who is running the script
+      shell: whoami
+      register: controlNodeUser
+
+    - name: Check how is running the script is in the dsudo group
+      shell: >
+        cat /etc/group |
+        grep sudo | 
+        grep -q {{controlNodeUser.stdout}} && 
+        echo -n True || 
+        echo -n False
+      register: isSudo
+
+    - name: Ensure non-prompt variables are defined
+      assert:
+        that: "{{ item }} is defined"
+        fail_msg: "Mandatory variables not set"
+      with_items:
+        - pythonHighVersion
+
+    - name: Check if correct version of python is installed
+      shell: >
+        python3 --version | 
+        grep -qi {{pythonHighVersion}} && 
+        echo -n True || 
+        echo -n False
+      register: isPythonVersionCorrect
+
+    - name: Confirm pre-reqs
+      assert:
+        that: "{{ item | bool }}"
+        fail_msg: Requirements not met
+      with_items:
+        - "{{isPythonVersionCorrect.stdout}}"
+        - "{{isSudo.stdout}}"
+
+  tasks:
+    - name: install ansible collections from requirments file
+      shell: ansible-galaxy collection install -r {{ playbook_dir}}/requirements.yml
+
+    - name: Download cymca cert
+      become: true
+      ansible.builtin.get_url:
+        url: http://intranet.cymcore.com/files/configuration/cymca.crt
+        dest: /usr/local/share/ca-certificates/cymca.crt
+        mode: '0440'
+
+    - name: import ca certs after copy
+      become: true
+      shell: update-ca-certificates
+
+    - name: install netaddr package - allows control node to do IP filters in jinja2 templates
+      pip:
+        name: netaddr
+
+    - name: install passlib package - allows hasing of passwords
+      pip:
+        name: passlib
+
+    - name: install dnspython - allows dig to look dns records in community.general.dig lookup
+      pip:
+        name: dnspython
+ 
+    - name: install cryptography - allows community.crypto
+      pip:
+        name: cryptography  
+
+    - name: install jmespath - ansible json queries
+      pip:
+        name: jmespath
+
+    - name: when ansible control node executes as root, need to see python modules from ansible user and also use certs from system
+      become: true
+      lineinfile:
+        path: /root/.bashrc
+        line: "{{ item.linetext }}"
+        insertafter: EOF
+        state: present
+      with_items:
+        - { linetext: "export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt"}
+        - { linetext: "export PYTHONPATH=$PYTHONPATH:/home/{{ controlNodeUser.stdout }}/.local/lib/python{{pythonHighVersion}}/site-packages"}
+  
+    - name: Install cryptography
+      become: true
+      apt:
+        pkg:
+        - build-essential
+        - libssl-dev
+        - libffi-dev
+        #- python-dev --> Removed as it's not part of python
+        update_cache: yes 
