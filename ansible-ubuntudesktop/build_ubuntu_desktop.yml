@@ -6,7 +6,7 @@
       vars:
         neverFail: True
       uri:
-        url: https://intranet.cymcore.com
+        url: http://intranet.cymcore.com
         return_content: no
       register: isOnCymcoreNetwork
       failed_when: neverFail is false

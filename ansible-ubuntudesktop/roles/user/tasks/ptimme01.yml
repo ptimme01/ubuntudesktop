@@ -76,7 +76,7 @@
   become: true
   copy:
     src: etcher-icon.png
-    dest: /home/Pictures/icons/
+    dest: /home/ptimme01/Pictures/icons/
     owner: ptimme01
     group: ptimme01
     mode: '0770'
@@ -84,7 +84,7 @@
 - name: Copy echer .desktop file
   become: true
   copy:
-    src: etcher.dekstop
+    src: etcher.desktop
     dest: /home/ptimme01/.local/share/applications/
     owner: ptimme01
     group: ptimme01

@@ -26,7 +26,7 @@ Improvements
 # TODO openvpn connection file
 # TODO add the 7zip package into the ansible repo
 # TODO copy wallpapers and set with gsettings
-#TODO at desktop file for balena etcher
+
 # test if you can get sensors to run automatically
 Issues
 -------
