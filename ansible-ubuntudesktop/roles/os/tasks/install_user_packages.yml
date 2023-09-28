@@ -43,3 +43,27 @@
       - org.kde.kdenlive
   shell: flatpak install flathub {{item}} -y
   with_items: "{{flatpakAppsToInstall}}"
+
+- name: Install user applications using base apt
+  tags: out
+  become: true
+  apt:
+    pkg:
+    - example
+    force_apt_get: yes
+    update_cache: yes
+
+
+- name: Download dropbox
+  become: true
+  ansible.builtin.get_url:
+    url: http://intranet.cymcore.com/files/software/ubuntu/dropbox_2020.03.04_amd64.deb
+    dest: /tmp/
+    mode: '0770'
+
+- name: Install dropbox
+  become: True
+  shell: apt install -y /tmp/dropbox_2020.03.04_amd64.deb
+
+
+  

@@ -1,7 +1,35 @@
 - name: install vmware
   hosts: localhost
   vars:
+  tasks:
+    - name: Creates Dropbox ssh dir
+      file:
+        path: /home/Dropbox/Documents/ssh
+        state: directory
+        mode: '0700'
 
-  roles:
-    - role: os
-      param_action: install_vmware_workstation
+    - name: Apply default acl to container run app directory
+      ansible.posix.acl:
+        default: yes
+        path: /home/Dropbox/Documents/ssh
+        entity: ptimme01
+        etype: user
+        permissions: rwx
+        state: present
+
+    - name: Apply default acl to container run app directory
+      ansible.posix.acl:
+        default: yes
+        path: /home/Dropbox/Documents/ssh
+        etype: group
+        permissions: 
+        state: present
+
+    - name: Apply default acl to container run app directory
+      ansible.posix.acl:
+        default: yes
+        path: /home/Dropbox/Documents/ssh
+        etype: other
+        permissions: 
+        state: present
+

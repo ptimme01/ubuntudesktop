@@ -1,0 +1,88 @@
+- name: Attach Dropbox to user
+  ansible.builtin.pause:
+    prompt: "Click Dropbox icon in dock, web page will launch,finsh setup (un,pw,code). Press Enter to continue"
+
+- name: Creates Dropbox ssh dir
+  file:
+    path: /home/Dropbox/Documents/ssh
+    state: directory
+    mode: '0700'
+
+- name: Apply acl to container run app directory
+  become: true
+  ansible.posix.acl:
+    path: /volumes/{{ logicalVolumeName }}/run/{{ dockerContainerName }}
+    entity: "{{ dockerAppUserAndGroupName }}"
+    etype: group
+    permissions: rwx
+    state: present
+  when: userRootContainer != 'y'
+
+- name: Apply default acl to container run app directory
+  become: true
+  ansible.posix.acl:
+    default: yes
+    path: /volumes/{{ logicalVolumeName }}/run/{{ dockerContainerName }}
+    entity: "{{ dockerAppUserAndGroupName }}"
+    etype: group
+    permissions: rwx
+    state: present
+  when: userRootContainer != 'y'
+
+- name: Set dash dock settings
+  shell: {{item}}
+  with_items:
+    - gsettings set org.gnome.shell.extensions.dash-to-dock dock-position BOTTOM
+    - gsettings set org.gnome.shell.extensions.dash-to-dock show-apps-at-top true
+    - gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 32
+    - gsettings get org.gnome.desktop.background picture-uri 'file:///home/ptimme01/Pictures/wallpaper/2020-Porsche-Taycan-4S-Volcano-Grey-Metallic-66.jpg'
+
+- name: Attach Dropbox to user
+  ansible.builtin.pause:
+    prompt: "Click Dropbox icon in dock, web page will launch,finsh setup (un,pw,code). Press Enter to continue"
+
+- name: Download etcher appimage
+  become: true
+  ansible.builtin.get_url:
+    url: http://intranet.cymcore.com/files/software/ubuntu/balenaEtcher-1.18.11-x64.AppImage
+    dest: /home/ptimme01/appimage
+    mode: '0770'
+    owner: ptimme01
+    group: ptimme01
+
+- name: Copy echer icon
+  become: true
+  copy:
+    src: etcher-icon.png
+    dest: /home/ptimme01/Pictures/icons/
+    owner: ptimme01
+    group: ptimme01
+    mode: '0770'
+
+- name: Copy echer .desktop file
+  become: true
+  copy:
+    src: etcher.desktop
+    dest: /home/ptimme01/.local/share/applications/
+    owner: ptimme01
+    group: ptimme01
+    mode: '0770'
+
+- name: Copy .dircolors to ptimme01 home
+  become: true
+  copy:
+    src: dircolors
+    dest: /home/ptimme01/.dircolors
+    owner: ptimme01
+    group: ptimme01
+    mode: '0660'
+
+- name: Attach Dropbox to user
+  ansible.builtin.pause:
+    prompt: {{item}}
+  with_items:
+    - Install gnome extension Gestures Improvements
+    - Install gnome extenstion Systemd Manager
+    - Install gnome extension Caffeine
+    - In VS Code set sync to ptimme01
+    - In VS Code set docker path on Remote Development to podman

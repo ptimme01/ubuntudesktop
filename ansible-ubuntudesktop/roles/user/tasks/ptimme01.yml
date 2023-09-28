@@ -29,24 +29,6 @@
     password: "{{ userOsPassword.user_input | password_hash('sha512') }}"
   no_log: true
 
-- name: Copy .dircolors to ptimme01 home
-  become: true
-  copy:
-    src: dircolors
-    dest: /home/ptimme01/.dircolors
-    owner: ptimme01
-    group: ptimme01
-    mode: '0660'
-
-- name: Copy configure_ptimme01 to ptimme01 home
-  become: true
-  copy:
-    src: configure_ptimme01.sh
-    dest: /home/ptimme01/configure_ptimme01.sh
-    owner: ptimme01
-    group: ptimme01
-    mode: '0770'
-
 - name: Creates directories in home
   tags: run
   become: true
@@ -59,33 +41,8 @@
   with_items:
     - { dest: 'appimage', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
     - { dest: 'scm', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
-    - { dest: 'Pictures/wallpaper', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
-    - { dest: 'Pictures/icons', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
-    - { dest: 'scripts', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+    #- { dest: 'Pictures/wallpaper', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+    #- { dest: 'Pictures/icons', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
+    #- { dest: 'scripts', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
 
-- name: Download etcher appimage
-  become: true
-  ansible.builtin.get_url:
-    url: http://intranet.cymcore.com/files/software/ubuntu/balenaEtcher-1.18.11-x64.AppImage
-    dest: /home/ptimme01/appimage
-    mode: '0770'
-    owner: ptimme01
-    group: ptimme01
 
-- name: Copy echer icon
-  become: true
-  copy:
-    src: etcher-icon.png
-    dest: /home/ptimme01/Pictures/icons/
-    owner: ptimme01
-    group: ptimme01
-    mode: '0770'
-
-- name: Copy echer .desktop file
-  become: true
-  copy:
-    src: etcher.desktop
-    dest: /home/ptimme01/.local/share/applications/
-    owner: ptimme01
-    group: ptimme01
-    mode: '0770'

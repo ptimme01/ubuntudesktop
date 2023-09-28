@@ -25,7 +25,7 @@ Improvements
 # TODO how to handle ssh keys
 # TODO openvpn connection file
 # TODO add the 7zip package into the ansible repo
-# TODO copy wallpapers and set with gsettings
+
 
 # test if you can get sensors to run automatically
 Issues
