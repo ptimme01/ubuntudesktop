@@ -21,8 +21,7 @@ OTP: BaldAdnd
 Improvements
 ----------------
 
-# TODO add dropbox to ptimme01
-# TODO how to handle ssh keys
+# TODO a macbook script that monitors ssh keys and does a chmod 700 -R on them
 # TODO openvpn connection file
 # TODO add the 7zip package into the ansible repo
 
