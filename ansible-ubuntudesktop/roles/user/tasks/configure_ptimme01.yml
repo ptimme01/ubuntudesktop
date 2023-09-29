@@ -2,47 +2,58 @@
   ansible.builtin.pause:
     prompt: "Click Dropbox icon in dock, web page will launch,finsh setup (un,pw,code). Press Enter to continue"
 
-- name: Creates Dropbox ssh dir
+- name: Remove default home dirs (link later to dropbox)
   file:
-    path: /home/Dropbox/Documents/ssh
+    path: /home/ptimme01/{{item}}
+    state: absent
+  with_items:
+    - Documents
+    - Pictures
+    - Music
+    - Videos
+    - Downloads
+
+- name: Link home dirs to dropbox
+  ansible.builtin.file:
+    src: /home/ptimme01/Dropbox/macbook/{{item}}
+    dest: /home/ptimme01/{{item}}
+    state: link
+  with_items:
+    - Documents
+    - Pictures
+    - Music
+    - Videos
+    - Downloads
+
+- name: Remove default home .ssh dirs (link later to dropbox)
+  file:
+    path: /home/ptimme01/.ssh
+    state: absent
+
+- name: Set ssh dir base permissions
+  file:
+    path: /home/ptimme01/Dropbox/macbook/Documents/ssh
     state: directory
-    mode: '0700'
+    owner: ptimme01
+    group: ptimme01
+    mode: "0700"
+    recurse: yes
 
-- name: Apply acl to container run app directory
-  become: true
-  ansible.posix.acl:
-    path: /volumes/{{ logicalVolumeName }}/run/{{ dockerContainerName }}
-    entity: "{{ dockerAppUserAndGroupName }}"
-    etype: group
-    permissions: rwx
-    state: present
-  when: userRootContainer != 'y'
-
-- name: Apply default acl to container run app directory
-  become: true
-  ansible.posix.acl:
-    default: yes
-    path: /volumes/{{ logicalVolumeName }}/run/{{ dockerContainerName }}
-    entity: "{{ dockerAppUserAndGroupName }}"
-    etype: group
-    permissions: rwx
-    state: present
-  when: userRootContainer != 'y'
+- name: Link home .ssh dirs to dropbox
+  ansible.builtin.file:
+    src: /home/ptimme01/Dropbox/macbook/Documents/ssh
+    dest: /home/ptimme01/.ssh
+    state: link
 
 - name: Set dash dock settings
-  shell: {{item}}
+  shell: "{{item}}"
   with_items:
     - gsettings set org.gnome.shell.extensions.dash-to-dock dock-position BOTTOM
     - gsettings set org.gnome.shell.extensions.dash-to-dock show-apps-at-top true
     - gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 32
-    - gsettings get org.gnome.desktop.background picture-uri 'file:///home/ptimme01/Pictures/wallpaper/2020-Porsche-Taycan-4S-Volcano-Grey-Metallic-66.jpg'
-
-- name: Attach Dropbox to user
-  ansible.builtin.pause:
-    prompt: "Click Dropbox icon in dock, web page will launch,finsh setup (un,pw,code). Press Enter to continue"
+    - gsettings set org.gnome.desktop.background picture-uri 'file:///home/ptimme01/Pictures/wallpaper/2020-Porsche-Taycan-4S-Volcano-Grey-Metallic-66.jpg'
 
 - name: Download etcher appimage
-  become: true
   ansible.builtin.get_url:
     url: http://intranet.cymcore.com/files/software/ubuntu/balenaEtcher-1.18.11-x64.AppImage
     dest: /home/ptimme01/appimage
@@ -51,7 +62,6 @@
     group: ptimme01
 
 - name: Copy echer icon
-  become: true
   copy:
     src: etcher-icon.png
     dest: /home/ptimme01/Pictures/icons/
@@ -60,7 +70,6 @@
     mode: '0770'
 
 - name: Copy echer .desktop file
-  become: true
   copy:
     src: etcher.desktop
     dest: /home/ptimme01/.local/share/applications/
@@ -69,7 +78,6 @@
     mode: '0770'
 
 - name: Copy .dircolors to ptimme01 home
-  become: true
   copy:
     src: dircolors
     dest: /home/ptimme01/.dircolors
@@ -77,12 +85,13 @@
     group: ptimme01
     mode: '0660'
 
-- name: Attach Dropbox to user
-  ansible.builtin.pause:
-    prompt: {{item}}
+- name: Manually do the following
+  debug:
+    msg: "{{item}}"
   with_items:
     - Install gnome extension Gestures Improvements
     - Install gnome extenstion Systemd Manager
     - Install gnome extension Caffeine
     - In VS Code set sync to ptimme01
     - In VS Code set docker path on Remote Development to podman
+    - In Edge flatpak set user so settings sync
