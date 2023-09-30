@@ -5,3 +5,5 @@ git config --global user.email $USER@outlook.com
 else
 git config --global user.email $USER@cymcore.com
 fi
+
+git config core.fileMode false
