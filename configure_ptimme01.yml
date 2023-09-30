@@ -1,0 +1,5 @@
+- name: Post configuration for user ptimme01
+  hosts: localhost
+  roles:
+    - role: user
+      param_action: configure_ptimme01

@@ -95,3 +95,19 @@
     - In VS Code set sync to ptimme01
     - In VS Code set docker path on Remote Development to podman
     - In Edge flatpak set user so settings sync
+
+- name: Change ssh keys on login and bash (Dropbox sync permissions cause ssh to not trust key)
+  vars:
+  blockinfile:
+    path: /home/ptimme01/{{item}}
+    marker: "; {mark} ANSIBLE MANAGED BLOCK user configure_ptimme01 ssh"
+    block: |
+      function ssh() {
+      chmod -R 700 /home/ptimme01/Dropbox/macbook/Documents/ssh
+      /usr/bin/ssh "$1"
+      }
+    state: present
+  with_items:
+    - .bashrc
+    - .profile
+
