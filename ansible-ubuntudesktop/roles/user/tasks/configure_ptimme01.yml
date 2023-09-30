@@ -96,18 +96,21 @@
     - In VS Code set docker path on Remote Development to podman
     - In Edge flatpak set user so settings sync
 
-- name: Change ssh keys on login and bash (Dropbox sync permissions cause ssh to not trust key)
+- name: Change ssh keys in .bashrc (Dropbox sync permissions cause ssh to not trust key)
   vars:
   blockinfile:
-    path: /home/ptimme01/{{item}}
-    marker: "; {mark} ANSIBLE MANAGED BLOCK user configure_ptimme01 ssh"
+    path: /home/ptimme01/.bashrc
+    marker: "# {mark} ANSIBLE MANAGED BLOCK user configure_ptimme01 ssh"
     block: |
       function ssh() {
       chmod -R 700 /home/ptimme01/Dropbox/macbook/Documents/ssh
       /usr/bin/ssh "$1"
       }
     state: present
-  with_items:
-    - .bashrc
-    - .profile
 
+- name: Change ssh keys in .profile (Dropbox sync permissions cause ssh to not trust key)
+  lineinfile:
+    path: /home/ptimme01/.profile 
+    line: chmod -R 700 /home/ptimme01/Dropbox/macbook/Documents/ssh
+    state: present
+    backup: yes
