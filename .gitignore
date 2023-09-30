@@ -1,2 +1,2 @@
-collections/**
-cache_facts/**
+./collections/**
+./cache_facts/**
