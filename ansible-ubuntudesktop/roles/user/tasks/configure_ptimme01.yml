@@ -52,6 +52,7 @@
     - gsettings set org.gnome.shell.extensions.dash-to-dock show-apps-at-top true
     - gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 32
     - gsettings set org.gnome.desktop.background picture-uri 'file:///home/ptimme01/Pictures/wallpaper/2020-Porsche-Taycan-4S-Volcano-Grey-Metallic-66.jpg'
+    - gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
 
 - name: Download etcher appimage
   ansible.builtin.get_url:
