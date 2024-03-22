@@ -36,6 +36,9 @@
       param_action: install_vmware_workstation
       when: shouldInstallVmwareWorkstation
     - role: os
+      param_action: configure_imac_wifiadapter
+      when: shouldConfigureImacWifiAdapter
+    - role: os
       param_action: configure_wificym
       when: shouldConfigureWificym
     - role: os

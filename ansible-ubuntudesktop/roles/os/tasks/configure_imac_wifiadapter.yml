@@ -1,0 +1,10 @@
+- name: Install broadcom driver to imac wifi
+  become: true
+  apt:
+    pkg:
+    - bcmwl-kernel-source
+    force_apt_get: yes
+    update_cache: yes
+
+    # need to reboot if you want it to show up, not sure about configure
+    # should add the wait to ensure apt is not busy
