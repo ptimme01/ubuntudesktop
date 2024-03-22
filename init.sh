@@ -11,7 +11,7 @@ sudo apt-get install -y git
 
 ## Install Ansible
 sudo apt install -y python3-pip
-sudo pip3 install ansible-core==2.12.2
+sudo pip3 install ansible-core==2.13.13
 
 ### Clone repository
 sudo mkdir -p /root/scm
