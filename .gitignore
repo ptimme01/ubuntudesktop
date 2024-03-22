@@ -1,2 +1,2 @@
-collections/**
-cache_facts/**
+ansible-ubuntudesktop/collections/**
+ansible-ubuntudesktop/cache_facts/**

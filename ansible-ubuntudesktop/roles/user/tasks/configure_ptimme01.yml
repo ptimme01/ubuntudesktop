@@ -52,6 +52,7 @@
     - gsettings set org.gnome.shell.extensions.dash-to-dock show-apps-at-top true
     - gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 32
     - gsettings set org.gnome.desktop.background picture-uri 'file:///home/ptimme01/Pictures/wallpaper/2020-Porsche-Taycan-4S-Volcano-Grey-Metallic-66.jpg'
+    - gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
 
 - name: Download etcher appimage
   ansible.builtin.get_url:
@@ -95,3 +96,22 @@
     - In VS Code set sync to ptimme01
     - In VS Code set docker path on Remote Development to podman
     - In Edge flatpak set user so settings sync
+
+- name: Change ssh keys in .bashrc (Dropbox sync permissions cause ssh to not trust key)
+  vars:
+  blockinfile:
+    path: /home/ptimme01/.bashrc
+    marker: "# {mark} ANSIBLE MANAGED BLOCK user configure_ptimme01 ssh"
+    block: |
+      function ssh() {
+      chmod -R 700 /home/ptimme01/Dropbox/macbook/Documents/ssh
+      /usr/bin/ssh "$1"
+      }
+    state: present
+
+- name: Change ssh keys in .profile (Dropbox sync permissions cause ssh to not trust key)
+  lineinfile:
+    path: /home/ptimme01/.profile 
+    line: chmod -R 700 /home/ptimme01/Dropbox/macbook/Documents/ssh
+    state: present
+    backup: yes

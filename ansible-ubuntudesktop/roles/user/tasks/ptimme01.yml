@@ -41,8 +41,5 @@
   with_items:
     - { dest: 'appimage', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
     - { dest: 'scm', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
-    #- { dest: 'Pictures/wallpaper', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
-    #- { dest: 'Pictures/icons', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
-    #- { dest: 'scripts', mode: '0770', owner: 'ptimme01', group: 'ptimme01'}
-
+    
 
